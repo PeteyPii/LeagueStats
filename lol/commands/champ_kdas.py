@@ -1,18 +1,19 @@
 import cassiopeia as cass
+import collections
 import tabulate
 import datapipelines
 
 from lol import command
 
 
-class ChampionWinratesCommand(command.Command):
+class ChampionKdasCommand(command.Command):
   def __init__(self, name):
     super().__init__(name)
 
   def help_message(self):
     return (
         f'Usage: {self._PROGRAM} {self.name} <summoner_name>\n'
-        'Outputs a summoner\'s winrate on all of the champions they have played.'
+        'Outputs a summoner\'s KDA on all of the champions they have played.'
     )
 
   def run(self, args):
@@ -36,17 +37,24 @@ class ChampionWinratesCommand(command.Command):
         {'$match': {'participants.accountId': summoner.account_id}},
         {'$group': {'_id': {'championId': '$participants.championId'},
                     'games_played': {'$sum': 1},
-                    'wins': {'$sum': {'$cond': ['$participants.stats.win', 1, 0]}}}},
-        {'$addFields': {'win_rate': {'$divide': ['$wins', '$games_played']}}},
-        {'$sort': {'win_rate': -1}},
+                    'kills': {'$sum': '$participants.stats.kills'},
+                    'deaths': {'$sum': '$participants.stats.deaths'},
+                    'assists': {'$sum': '$participants.stats.assists'},
+                    }},
+        {'$addFields': {'kda': {'$divide': [{'$add': ['$kills', '$assists']},
+                                            {'$cond': [{'$lte': ['$deaths', 0]}, 1, '$deaths']}]
+                                            }}},
+        {'$sort': {'kda': -1}},
     ]
 
     champion_list = cass.get_champions()
     champ_id_to_name = {champ.id: champ.name for champ in champion_list}
-    table = ({
-      'Champion': champ_id_to_name[result['_id']['championId']],
-      'Wins': result['wins'],
-      'Games Played': result['games_played'],
-      'Win %': 100.0 * result['win_rate'],
-    } for result in self.db.matches.aggregate(pipeline))
-    print(tabulate.tabulate(table, headers={'Champion': 'Champion', 'Wins': 'Wins', 'Games Played': 'Games Played', 'Win %': 'Win %'}))
+
+    table = []
+    for result in self.db.matches.aggregate(pipeline):
+      table.append(collections.OrderedDict([
+          ('Champion', champ_id_to_name[result['_id']['championId']]),
+          ('KDA', result['kda']),
+          ('Games Played', result['games_played']),
+      ]))
+    print(tabulate.tabulate(table, headers='keys'))

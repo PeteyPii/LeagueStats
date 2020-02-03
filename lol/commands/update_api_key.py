@@ -27,7 +27,7 @@ class UpdateApiKeyCommand(command.Command):
       data = new_summoner.to_dict()
       data['last_updated_match_id'] = summoner['last_updated_match_id']
       if self.db.temp_summoners.find_one({'puuid': summoner['puuid']}):
-        pass
+        continue
       try:
         self.db.temp_summoners.insert_one(data)
       except pymongo.errors.DuplicateKeyError:
@@ -58,7 +58,7 @@ class UpdateApiKeyCommand(command.Command):
             # Potentially someone could have switched their summoner name and
             # a different account could have stolen it but it is unlikely and
             # not very important for our purposes.
-            summoner = cass.Summoner(name=participant['summonerName']).load()
+            summoner = cass.Summoner(name=participant['summonerName'], region=match['region']).load()
             participant['summonerId'] = summoner.id
             participant['currentAccountId'] = summoner.account_id
             participant['accountId'] = summoner.account_id
@@ -74,7 +74,7 @@ class UpdateApiKeyCommand(command.Command):
     print(f'White: {already_updated_count}, green: {full_renew_count}, '
           f'yellow: {partial_renew_count}, red: {partial_renew_failures}')
 
-    # # -- PART 2 ---
+    # -- PART 2 ---
     self.db.matches.rename('old_matches')
     self.db.summoners.rename('old_summoners')
     self.db.temp_matches.rename('matches')

@@ -15,7 +15,7 @@ class TrackSummonerCommand(command.Command):
         'Adds a summoner to be tracked when running the "update" command.'
     )
 
-  def run(self, args):
+  def _run_impl(self, args, **kwargs):
     if len(args) != 1:
       return self.print_invalid_usage()
 

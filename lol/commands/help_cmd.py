@@ -14,7 +14,7 @@ class HelpCommand(command.Command):
         'Prints a help message about all commands or one particular command.'
     )
 
-  def run(self, args):
+  def _run_impl(self, args, **kwargs):
     if len(args) > 1:
       self.print_invalid_usage()
       print('')

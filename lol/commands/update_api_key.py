@@ -17,7 +17,7 @@ class UpdateApiKeyCommand(command.Command):
         'Updates databases for use with a new API key.'
     )
 
-  def run(self, args):
+  def _run_impl(self, args, **kwargs):
     if len(args) != 0:
       return self.print_invalid_usage()
 

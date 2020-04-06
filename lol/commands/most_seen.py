@@ -16,7 +16,7 @@ class MostSeenCommand(command.Command):
         'Lists the most seen summoners in games with the specified summoner.'
     )
 
-  def run(self, args):
+  def _run_impl(self, args, **kwargs):
     if len(args) < 1 or len(args) > 2:
       return self.print_invalid_usage()
 
@@ -38,7 +38,11 @@ class MostSeenCommand(command.Command):
           team = participant['side']
           break
       for participant in match['participants']:
-        counts[participant['accountId']]['name'] = participant['summonerName']
+        if counts[participant['accountId']]['name'] == 0:
+          counts[participant['accountId']]['name'] = set([participant['summonerName']])
+        else:
+          if False:
+            counts[participant['accountId']]['name'].add(participant['summonerName'])
         counts[participant['accountId']]['games_played'] += 1
         same_team = team == participant['side']
         counts[participant['accountId']]['same_team'] += int(same_team)
@@ -62,7 +66,7 @@ class MostSeenCommand(command.Command):
         wins_against = '-'
 
       table.append(collections.OrderedDict([
-          ('Summoner', stats['name']),
+          ('Summoner', ','.join(stats['name'])),
           ('Games Played', stats['games_played']),
           ('Wins With', wins_with),
           ('Wins Against', wins_against),

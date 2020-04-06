@@ -14,7 +14,7 @@ class UpdateSummonersCommand(command.Command):
         'Updates the summoner info for all summoners that are being tracked.'
     )
 
-  def run(self, args):
+  def _run_impl(self, args, **kwargs):
     if len(args) != 0:
       return self.print_invalid_usage()
 

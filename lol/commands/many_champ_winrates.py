@@ -21,7 +21,7 @@ class ManyChampionWinratesCommand(command.Command):
       return ''
     return f'{100.0 * result["win_rate"]:.3f} ({result["games_played"]})'
 
-  def run(self, args):
+  def _run_impl(self, args, **kwargs):
     if len(args) != 1:
       return self.print_invalid_usage()
 

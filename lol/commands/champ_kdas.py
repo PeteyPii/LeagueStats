@@ -16,7 +16,7 @@ class ChampionKdasCommand(command.Command):
         'Outputs a summoner\'s KDA on all of the champions they have played.'
     )
 
-  def run(self, args):
+  def _run_impl(self, args, **kwargs):
     if len(args) != 1:
       return self.print_invalid_usage()
 

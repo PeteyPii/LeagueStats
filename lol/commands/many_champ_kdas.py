@@ -24,7 +24,7 @@ class ManyChampionKdasCommand(command.Command):
     avg_assists = float(result['assists']) / result['games_played']
     return f'{result["kda"]:.3f}:1   {avg_kills:.1f} / {avg_deaths:.1f} / {avg_assists:.1f}   ({result["games_played"]})'
 
-  def run(self, args):
+  def _run_impl(self, args, **kwargs):
     if len(args) != 1:
       return self.print_invalid_usage()
 

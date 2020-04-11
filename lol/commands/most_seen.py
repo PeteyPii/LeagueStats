@@ -16,7 +16,7 @@ class MostSeenCommand(command.Command):
         'Lists the most seen summoners in games with the specified summoner.'
     )
 
-  def _run_impl(self, args, **kwargs):
+  def _run_impl(self, args):
     if len(args) < 1 or len(args) > 2:
       return self.print_invalid_usage()
 

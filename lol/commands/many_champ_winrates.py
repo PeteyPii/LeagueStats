@@ -2,6 +2,7 @@ import cassiopeia as cass
 import tabulate
 import datapipelines
 import collections
+import time
 
 from lol import command
 
@@ -21,7 +22,7 @@ class ManyChampionWinratesCommand(command.Command):
       return ''
     return f'{100.0 * result["win_rate"]:.3f} ({result["games_played"]})'
 
-  def _run_impl(self, args, **kwargs):
+  def _run_impl(self, args):
     if len(args) != 1:
       return self.print_invalid_usage()
 
@@ -40,9 +41,9 @@ class ManyChampionWinratesCommand(command.Command):
 
     pipeline = [
         {'$match': {'mode': 'ARAM'}},  # optional
+        # {'$match': {'gameCreation': {'$gt': 1000 * (time.time() - 14 * 24 * 60 * 60)  }}},
         {'$project': {'participants': True}},
         {'$unwind': '$participants'},
-        {'$match': {'participants.accountId': {'$in': [summoner.account_id for summoner in summoners]}}},
         {'$group': {'_id': {'championId': '$participants.championId',
                             'accountId': '$participants.accountId'},
                     'games_played': {'$sum': 1},
@@ -54,6 +55,7 @@ class ManyChampionWinratesCommand(command.Command):
 
     global_pipeline = [
         {'$match': {'mode': 'ARAM'}},  # optional
+        # {'$match': {'gameCreation': {'$gt': 1000 * (time.time() - 14 * 24 * 60 * 60)  }}},
         {'$project': {'participants': True}},
         {'$unwind': '$participants'},
         {'$group': {'_id': {'championId': '$participants.championId'},

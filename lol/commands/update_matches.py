@@ -23,7 +23,7 @@ class UpdateMatchesCommand(command.Command):
         'Updates the database with the matches for all summoners being tracked.'
     )
 
-  def _run_impl(self, args, **kwargs):
+  def _run_impl(self, args):
     if args:
       return self.print_invalid_usage()
 

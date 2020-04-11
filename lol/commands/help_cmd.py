@@ -14,7 +14,7 @@ class HelpCommand(command.Command):
         'Prints a help message about all commands or one particular command.'
     )
 
-  def _run_impl(self, args, **kwargs):
+  def _run_impl(self, args):
     if len(args) > 1:
       self.print_invalid_usage()
       print('')
@@ -25,4 +25,7 @@ class HelpCommand(command.Command):
         print(f'  {name}')
         print(textwrap.indent(self._command_map.commands[name].help_message(), '    '))
     else:
-      print(self._command_mapper.get_command(args[0]).help_message())
+      print(self._command_map.commands[args[0]].help_message())
+      if self._command_map.commands[args[0]]._flags:
+        print('\nAvailable flags:')
+        print(self.self._command_map.commands[args[0]].help_message_flags())

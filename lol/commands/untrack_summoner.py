@@ -14,7 +14,7 @@ class UntrackSummonerCommand(command.Command):
         'Removes a summoner from being tracked when running the "update" command.'
     )
 
-  def _run_impl(self, args, **kwargs):
+  def _run_impl(self, args):
     if len(args) != 1:
       return self.print_invalid_usage()
 

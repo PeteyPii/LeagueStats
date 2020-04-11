@@ -23,12 +23,5 @@ def main(argv):
 
   command.run(argv[2:])
 
-  # me = cass.Summoner(name="BasicBananas")
-  # print(me.champion_masteries)
-  # x = me.match_history[0].load()
-  # import pdb; pdb.set_trace()
-  # with open('test', 'w') as f:
-  #   f.write(me.match_history[0].load().to_json())
-
 if __name__ == '__main__':
   main(sys.argv)

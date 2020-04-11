@@ -15,7 +15,7 @@ class ChampionWinratesCommand(command.Command):
         'Outputs a summoner\'s winrate on all of the champions they have played.'
     )
 
-  def _run_impl(self, args, **kwargs):
+  def _run_impl(self, args):
     if len(args) != 1:
       return self.print_invalid_usage()
 

@@ -11,7 +11,7 @@ class ListSummonersCommand(command.Command):
         'Lists all the summoners that are being tracked.'
     )
 
-  def _run_impl(self, args, **kwargs):
+  def _run_impl(self, args):
     if args:
       return self.print_invalid_usage()
 

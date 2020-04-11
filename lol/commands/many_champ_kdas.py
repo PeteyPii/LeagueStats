@@ -9,6 +9,7 @@ from lol import command
 class ManyChampionKdasCommand(command.Command):
   def __init__(self, name):
     super().__init__(name)
+    self.register_flag(command.Flag(name="csv_file", default="", description="CSV file to export the results to."))
 
   def help_message(self):
     return (
@@ -24,7 +25,7 @@ class ManyChampionKdasCommand(command.Command):
     avg_assists = float(result['assists']) / result['games_played']
     return f'{result["kda"]:.3f}:1   {avg_kills:.1f} / {avg_deaths:.1f} / {avg_assists:.1f}   ({result["games_played"]})'
 
-  def _run_impl(self, args, **kwargs):
+  def _run_impl(self, args):
     if len(args) != 1:
       return self.print_invalid_usage()
 

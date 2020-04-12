@@ -3,6 +3,7 @@ import tabulate
 import datapipelines
 import collections
 import time
+import csv
 
 from lol import command
 
@@ -10,6 +11,7 @@ from lol import command
 class ManyChampionWinratesCommand(command.Command):
   def __init__(self, name):
     super().__init__(name)
+    self.register_flag(command.Flag(name='csv_file', default='', description='CSV file to export the results to.'))
 
   def help_message(self):
     return (
@@ -78,3 +80,10 @@ class ManyChampionWinratesCommand(command.Command):
       table.append(row)
 
     print(tabulate.tabulate(table, headers='keys'))
+
+    if self.flag('csv_file') and table:
+      with open(self.flag('csv_file'), 'w', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames= list(table[0].keys()))
+        writer.writeheader()
+        for row in table:
+          writer.writerow(row)

@@ -43,7 +43,7 @@ class Command(object):
     self._flags[flag.name] = flag
 
   def flag(self, name):
-    return self._flags[flag.name].value
+    return self._flags[name].value
 
   def run(self, args):
     argv = []
@@ -57,14 +57,14 @@ class Command(object):
         no_more_flags = True
       elif arg.startswith('--'):
         flag_val = arg[2:].split('=', 1)
-        if flag_val[0] not in self.flags:
-          print(f'Unrecognized flag: {flag[0]}')
+        if flag_val[0] not in self._flags:
+          print(f'Unrecognized flag: {flag_val[0]}')
           self.print_invalid_usage()
           return
-        if len(flag) == 2:
-          self.flags[flag_val[0]].value = flag_val[1]
+        if len(flag_val) == 2:
+          self._flags[flag_val[0]].value = flag_val[1]
         else:
-          self.flags[flag_val[0]].value = True
+          self._flags[flag_val[0]].value = True
       else:
         argv.append(arg)
 

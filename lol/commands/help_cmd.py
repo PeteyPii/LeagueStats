@@ -28,4 +28,4 @@ class HelpCommand(command.Command):
       print(self._command_map.commands[args[0]].help_message())
       if self._command_map.commands[args[0]]._flags:
         print('\nAvailable flags:')
-        print(self.self._command_map.commands[args[0]].help_message_flags())
+        print(textwrap.indent(self._command_map.commands[args[0]].help_message_flags(), '  '))

@@ -38,11 +38,13 @@ class MostSeenCommand(command.Command):
           team = participant['side']
           break
       for participant in match['participants']:
-        if counts[participant['accountId']]['name'] == 0:
+        if participant['accountId'] == '0': # BOT account
+          continue
+        if not counts[participant['accountId']]['name']:
           counts[participant['accountId']]['name'] = set([participant['summonerName']])
         else:
-          if False:
-            counts[participant['accountId']]['name'].add(participant['summonerName'])
+          # counts[participant['accountId']]['name'].add(participant['summonerName'])
+          pass
         counts[participant['accountId']]['games_played'] += 1
         same_team = team == participant['side']
         counts[participant['accountId']]['same_team'] += int(same_team)

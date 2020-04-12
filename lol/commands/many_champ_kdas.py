@@ -9,7 +9,6 @@ from lol import command
 class ManyChampionKdasCommand(command.Command):
   def __init__(self, name):
     super().__init__(name)
-    self.register_flag(command.Flag(name="csv_file", default="", description="CSV file to export the results to."))
 
   def help_message(self):
     return (

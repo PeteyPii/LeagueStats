@@ -6,12 +6,14 @@ import time
 import csv
 
 from lol import command
+from lol.flags.time import TimeFlags
 
 
 class ManyChampionWinratesCommand(command.Command):
   def __init__(self, name):
     super().__init__(name)
     self.register_flag(command.Flag(name='csv_file', default='', description='CSV file to export the results to.'))
+    self.time_flags = TimeFlags(self)
 
   def help_message(self):
     return (
@@ -41,9 +43,8 @@ class ManyChampionWinratesCommand(command.Command):
         return
     summoners.sort(key=lambda s: s.name)
 
-    pipeline = [
+    pipeline = self.time_flags.filter_steps() + [
         {'$match': {'mode': 'ARAM'}},  # optional
-        # {'$match': {'gameCreation': {'$gt': 1000 * (time.time() - 14 * 24 * 60 * 60)  }}},
         {'$project': {'participants': True}},
         {'$unwind': '$participants'},
         {'$group': {'_id': {'championId': '$participants.championId',
@@ -55,9 +56,8 @@ class ManyChampionWinratesCommand(command.Command):
     results = {(result['_id']['championId'], result['_id']['accountId']): result
                for result in self.db.matches.aggregate(pipeline)}
 
-    global_pipeline = [
+    global_pipeline = self.time_flags.filter_steps() + [
         {'$match': {'mode': 'ARAM'}},  # optional
-        # {'$match': {'gameCreation': {'$gt': 1000 * (time.time() - 14 * 24 * 60 * 60)  }}},
         {'$project': {'participants': True}},
         {'$unwind': '$participants'},
         {'$group': {'_id': {'championId': '$participants.championId'},

@@ -11,6 +11,9 @@ class MostSeenCommand(command.Command):
   def __init__(self, name):
     super().__init__(name)
     self.match_filtering_flags = MatchFilteringFlags(self)
+    self.register_flag(command.Flag(name='list_name_changes',
+                                    default=False,
+                                    description='Lists all the names for every summoner.'))
 
   def help_message(self):
     return (
@@ -47,8 +50,8 @@ class MostSeenCommand(command.Command):
           continue
         if not counts[participant['accountId']]['name']:
           counts[participant['accountId']]['name'] = set([participant['summonerName']])
-        else:
-          # counts[participant['accountId']]['name'].add(participant['summonerName'])
+        elif self.flag('list_name_changes'):
+          counts[participant['accountId']]['name'].add(participant['summonerName'])
           pass
         counts[participant['accountId']]['games_played'] += 1
         same_team = team == participant['side']

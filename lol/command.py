@@ -32,7 +32,10 @@ class Command(object):
   def help_message_flags(self):
     msg = []
     for flag in sorted(self._flags.keys()):
-      msg.append(f'--{flag}: {self._flags[flag].description}')
+      if self._flags[flag].default == '':
+        msg.append(f'--{flag}: {self._flags[flag].description}')
+      else:
+        msg.append(f'--{flag} (default={self._flags[flag].default}): {self._flags[flag].description}')
     return '\n'.join(msg)
 
   def print_invalid_usage(self):

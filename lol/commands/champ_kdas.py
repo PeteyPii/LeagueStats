@@ -33,7 +33,6 @@ class ChampionKdasCommand(command.Command):
       return
 
     pipeline = self.match_filtering_flags.filter_steps() + [
-        {'$match': {'mode': 'ARAM'}},  # optional
         {'$project': {'participants': True}},
         {'$unwind': '$participants'},
         {'$match': {'participants.accountId': summoner.account_id}},

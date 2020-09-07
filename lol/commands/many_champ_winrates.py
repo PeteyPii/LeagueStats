@@ -44,7 +44,6 @@ class ManyChampionWinratesCommand(command.Command):
     summoners.sort(key=lambda s: s.name)
 
     pipeline = self.match_filtering_flags.filter_steps() + [
-        {'$match': {'mode': 'ARAM'}},  # optional
         {'$project': {'participants': True}},
         {'$unwind': '$participants'},
         {'$group': {'_id': {'championId': '$participants.championId',
@@ -57,7 +56,6 @@ class ManyChampionWinratesCommand(command.Command):
                for result in self.db.matches.aggregate(pipeline)}
 
     global_pipeline = self.match_filtering_flags.filter_steps() + [
-        {'$match': {'mode': 'ARAM'}},  # optional
         {'$project': {'participants': True}},
         {'$unwind': '$participants'},
         {'$group': {'_id': {'championId': '$participants.championId'},

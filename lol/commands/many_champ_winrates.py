@@ -6,14 +6,14 @@ import time
 import csv
 
 from lol import command
-from lol.flags.time import TimeFlags
+from lol.flags.match_filtering import MatchFilteringFlags
 
 
 class ManyChampionWinratesCommand(command.Command):
   def __init__(self, name):
     super().__init__(name)
     self.register_flag(command.Flag(name='csv_file', default='', description='CSV file to export the results to.'))
-    self.time_flags = TimeFlags(self)
+    self.match_filtering_flags = MatchFilteringFlags(self)
 
   def help_message(self):
     return (
@@ -43,7 +43,7 @@ class ManyChampionWinratesCommand(command.Command):
         return
     summoners.sort(key=lambda s: s.name)
 
-    pipeline = self.time_flags.filter_steps() + [
+    pipeline = self.match_filtering_flags.filter_steps() + [
         {'$match': {'mode': 'ARAM'}},  # optional
         {'$project': {'participants': True}},
         {'$unwind': '$participants'},
@@ -56,7 +56,7 @@ class ManyChampionWinratesCommand(command.Command):
     results = {(result['_id']['championId'], result['_id']['accountId']): result
                for result in self.db.matches.aggregate(pipeline)}
 
-    global_pipeline = self.time_flags.filter_steps() + [
+    global_pipeline = self.match_filtering_flags.filter_steps() + [
         {'$match': {'mode': 'ARAM'}},  # optional
         {'$project': {'participants': True}},
         {'$unwind': '$participants'},

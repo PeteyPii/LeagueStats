@@ -3,11 +3,13 @@ import tabulate
 import datapipelines
 
 from lol import command
+from lol.flags.match_filtering import MatchFilteringFlags
 
 
 class ChampionWinratesCommand(command.Command):
   def __init__(self, name):
     super().__init__(name)
+    self.match_filtering_flags = MatchFilteringFlags(self)
 
   def help_message(self):
     return (
@@ -29,7 +31,7 @@ class ChampionWinratesCommand(command.Command):
       print(f'Summoner "{summoner_name}" not found.')
       return
 
-    pipeline = [
+    pipeline = self.match_filtering_flags.filter_steps() + [
         {'$match': {'mode': 'ARAM'}},  # optional
         {'$project': {'participants': True}},
         {'$unwind': '$participants'},

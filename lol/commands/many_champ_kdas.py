@@ -4,11 +4,13 @@ import tabulate
 import datapipelines
 
 from lol import command
+from lol.flags.match_filtering import MatchFilteringFlags
 
 
 class ManyChampionKdasCommand(command.Command):
   def __init__(self, name):
     super().__init__(name)
+    self.match_filtering_flags = MatchFilteringFlags(self)
 
   def help_message(self):
     return (
@@ -41,7 +43,7 @@ class ManyChampionKdasCommand(command.Command):
         return
     summoners.sort(key=lambda s: s.name)
 
-    pipeline = [
+    pipeline = self.match_filtering_flags.filter_steps() + [
         {'$match': {'mode': 'ARAM'}},  # optional
         {'$project': {'participants': True}},
         {'$unwind': '$participants'},
@@ -59,7 +61,7 @@ class ManyChampionKdasCommand(command.Command):
     results = {(result['_id']['championId'], result['_id']['accountId']): result
                for result in self.db.matches.aggregate(pipeline)}
 
-    global_pipeline = [
+    global_pipeline = self.match_filtering_flags.filter_steps() + [
         {'$match': {'mode': 'ARAM'}},  # optional
         {'$project': {'participants': True}},
         {'$unwind': '$participants'},

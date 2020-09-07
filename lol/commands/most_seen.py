@@ -4,11 +4,13 @@ import tabulate
 import datapipelines
 
 from lol import command
+from lol.flags.match_filtering import MatchFilteringFlags
 
 
 class MostSeenCommand(command.Command):
   def __init__(self, name):
     super().__init__(name)
+    self.match_filtering_flags = MatchFilteringFlags(self)
 
   def help_message(self):
     return (
@@ -32,7 +34,10 @@ class MostSeenCommand(command.Command):
       return
 
     counts = collections.defaultdict(lambda: collections.defaultdict(int))
-    for match in self.db.matches.find({'participants.accountId': summoner.account_id}):
+    pipeline = self.match_filtering_flags.filter_steps() + [
+      {'$match': {'participants.accountId': summoner.account_id}},
+    ]
+    for match in self.db.matches.aggregate(pipeline):
       for participant in match['participants']:
         if participant['accountId'] == summoner.account_id:
           team = participant['side']

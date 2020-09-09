@@ -4,8 +4,6 @@ from lol.commands import champ_winrates
 from lol.commands import champ_kdas
 from lol.commands import help_cmd
 from lol.commands import list_summoners
-from lol.commands import many_champ_winrates
-from lol.commands import many_champ_kdas
 from lol.commands import matchups
 from lol.commands import most_seen
 from lol.commands import track_summoner
@@ -36,9 +34,7 @@ class CommandMap(object):
     command_map.register_command(update_summoners.UpdateSummonersCommand('update_summoners'))
     command_map.register_command(update_api_key.UpdateApiKeyCommand('update_api_key'))
     command_map.register_command(champ_winrates.ChampionWinratesCommand('winrates'))
-    command_map.register_command(many_champ_winrates.ManyChampionWinratesCommand('many_winrates'))
     command_map.register_command(champ_kdas.ChampionKdasCommand('kdas'))
-    command_map.register_command(many_champ_kdas.ManyChampionKdasCommand('many_kdas'))
     command_map.register_command(most_seen.MostSeenCommand('most_seen'))
     command_map.register_command(matchups.MatchupsCommand('matchups'))
 

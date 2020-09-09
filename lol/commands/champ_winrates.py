@@ -1,5 +1,7 @@
 import cassiopeia as cass
 import datapipelines
+import collections
+import time
 
 from lol import command
 from lol.flags.match_filtering import MatchFilteringFlags
@@ -14,41 +16,63 @@ class ChampionWinratesCommand(command.Command):
 
   def help_message(self):
     return (
-        f'Usage: {self._PROGRAM} {self.name} <summoner_name>\n'
-        'Outputs a summoner\'s winrate on all of the champions they have played.'
+        f'Usage: {self._PROGRAM} {self.name} <summoner_names>\n'
+        'Outputs each summoner\'s winrate on all of the champions they have played.'
     )
+
+  def format_result(self, result):
+    if result is None:
+      return ''
+    return f'{100.0 * result["win_rate"]:.3f} ({result["games_played"]})'
 
   def _run_impl(self, args):
     if len(args) != 1:
       return self.print_invalid_usage()
 
-    summoner_name = args[0]
-    if not summoner_name:
-      print(f'Summoner name cannot be empty.')
-      return
-    try:
-      summoner = cass.Summoner(name=summoner_name).load()
-    except datapipelines.common.NotFoundError:
-      print(f'Summoner "{summoner_name}" not found.')
-      return
+    summoner_names = args[0].split(',')
+    summoners = []
+    for name in summoner_names:
+      if not name:
+        print(f'Summoner name cannot be empty.')
+        return
+      try:
+        summoners.append(cass.Summoner(name=name).load())
+      except datapipelines.common.NotFoundError:
+        print(f'Summoner "{name}" not found.')
+        return
+    summoners.sort(key=lambda s: s.name)
 
     pipeline = self.match_filtering_flags.filter_steps() + [
         {'$project': {'participants': True}},
         {'$unwind': '$participants'},
-        {'$match': {'participants.accountId': summoner.account_id}},
+        {'$group': {'_id': {'championId': '$participants.championId',
+                            'accountId': '$participants.accountId'},
+                    'games_played': {'$sum': 1},
+                    'wins': {'$sum': {'$cond': ['$participants.stats.win', 1, 0]}}}},
+        {'$addFields': {'win_rate': {'$divide': ['$wins', '$games_played']}}},
+    ]
+    results = {(result['_id']['championId'], result['_id']['accountId']): result
+               for result in self.db.matches.aggregate(pipeline)}
+
+    global_pipeline = self.match_filtering_flags.filter_steps() + [
+        {'$project': {'participants': True}},
+        {'$unwind': '$participants'},
         {'$group': {'_id': {'championId': '$participants.championId'},
                     'games_played': {'$sum': 1},
                     'wins': {'$sum': {'$cond': ['$participants.stats.win', 1, 0]}}}},
         {'$addFields': {'win_rate': {'$divide': ['$wins', '$games_played']}}},
-        {'$sort': {'win_rate': -1}},
     ]
+    global_results = {result['_id']['championId']: result
+                      for result in self.db.matches.aggregate(global_pipeline)}
 
     champion_list = cass.get_champions()
     champ_id_to_name = {champ.id: champ.name for champ in champion_list}
-    table = [{
-      'Champion': champ_id_to_name[result['_id']['championId']],
-      'Wins': result['wins'],
-      'Games Played': result['games_played'],
-      'Win %': 100.0 * result['win_rate'],
-    } for result in self.db.matches.aggregate(pipeline)]
+
+    table = []
+    for champ_id, champ_name in sorted(champ_id_to_name.items(), key=lambda t: t[1]):
+      row = collections.OrderedDict({'Champion': champ_name})
+      for summoner in summoners:
+        row[summoner.name] = self.format_result(results.get((champ_id, summoner.account_id)))
+      row['Global Avg'] = self.format_result(global_results.get(champ_id))
+      table.append(row)
     self.table_output_flags.output_table(table)

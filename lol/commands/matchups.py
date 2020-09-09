@@ -1,16 +1,16 @@
 import cassiopeia as cass
 import collections
-import tabulate
-# import datapipelines
 
 from lol import command
 from lol.flags.match_filtering import MatchFilteringFlags
+from lol.flags.table_output import TableOutputFlags
 
 
 class MatchupsCommand(command.Command):
   def __init__(self, name):
     super().__init__(name)
     self.match_filtering_flags = MatchFilteringFlags(self)
+    self.table_output_flags = TableOutputFlags(self)
 
   def help_message(self):
     return (
@@ -50,5 +50,4 @@ class MatchupsCommand(command.Command):
           win_rate = float(stats['wins']) / stats['games_played']
           row[champ_against.name] = f'{stats["wins"]} / {stats["games_played"]} ({100 * win_rate:.3f})'
       table.append(row)
-
-    print(tabulate.tabulate(table, headers='keys'))
+    self.table_output_flags.output_table(table)

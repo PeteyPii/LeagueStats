@@ -1,16 +1,17 @@
 import cassiopeia as cass
 import collections
-import tabulate
 import datapipelines
 
 from lol import command
 from lol.flags.match_filtering import MatchFilteringFlags
+from lol.flags.table_output import TableOutputFlags
 
 
 class ChampionKdasCommand(command.Command):
   def __init__(self, name):
     super().__init__(name)
     self.match_filtering_flags = MatchFilteringFlags(self)
+    self.table_output_flags = TableOutputFlags(self)
 
   def help_message(self):
     return (
@@ -58,4 +59,5 @@ class ChampionKdasCommand(command.Command):
           ('KDA', result['kda']),
           ('Games Played', result['games_played']),
       ]))
-    print(tabulate.tabulate(table, headers='keys'))
+    self.table_output_flags.output_table(table)
+

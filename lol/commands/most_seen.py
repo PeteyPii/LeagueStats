@@ -1,16 +1,17 @@
 import cassiopeia as cass
 import collections
-import tabulate
 import datapipelines
 
 from lol import command
 from lol.flags.match_filtering import MatchFilteringFlags
+from lol.flags.table_output import TableOutputFlags
 
 
 class MostSeenCommand(command.Command):
   def __init__(self, name):
     super().__init__(name)
     self.match_filtering_flags = MatchFilteringFlags(self)
+    self.table_output_flags = TableOutputFlags(self)
     self.register_flag(command.Flag(name='list_name_changes',
                                     default=False,
                                     is_boolean=True,
@@ -85,4 +86,4 @@ class MostSeenCommand(command.Command):
 
     table.sort(key=lambda i: i['Games Played'])
     table.reverse()
-    print(tabulate.tabulate(table[:n], headers='keys'))
+    self.table_output_flags.output_table(table)

@@ -1,19 +1,18 @@
 import cassiopeia as cass
-import tabulate
 import datapipelines
 import collections
 import time
-import csv
 
 from lol import command
 from lol.flags.match_filtering import MatchFilteringFlags
+from lol.flags.table_output import TableOutputFlags
 
 
 class ManyChampionWinratesCommand(command.Command):
   def __init__(self, name):
     super().__init__(name)
-    self.register_flag(command.Flag(name='csv_file', default='', description='CSV file to export the results to.'))
     self.match_filtering_flags = MatchFilteringFlags(self)
+    self.table_output_flags = TableOutputFlags(self)
 
   def help_message(self):
     return (
@@ -76,12 +75,4 @@ class ManyChampionWinratesCommand(command.Command):
         row[summoner.name] = self.format_result(results.get((champ_id, summoner.account_id)))
       row['Global Avg'] = self.format_result(global_results.get(champ_id))
       table.append(row)
-
-    print(tabulate.tabulate(table, headers='keys'))
-
-    if self.flag('csv_file') and table:
-      with open(self.flag('csv_file'), 'w', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=list(table[0].keys()))
-        writer.writeheader()
-        for row in table:
-          writer.writerow(row)
+    self.table_output_flags.output_table(table)

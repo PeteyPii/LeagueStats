@@ -81,7 +81,7 @@ class ManyChampionWinratesCommand(command.Command):
 
     if self.flag('csv_file') and table:
       with open(self.flag('csv_file'), 'w', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames= list(table[0].keys()))
+        writer = csv.DictWriter(f, fieldnames=list(table[0].keys()))
         writer.writeheader()
         for row in table:
           writer.writerow(row)

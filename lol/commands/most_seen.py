@@ -13,6 +13,7 @@ class MostSeenCommand(command.Command):
     self.match_filtering_flags = MatchFilteringFlags(self)
     self.register_flag(command.Flag(name='list_name_changes',
                                     default=False,
+                                    is_boolean=True,
                                     description='Lists all the names for every summoner.'))
 
   def help_message(self):

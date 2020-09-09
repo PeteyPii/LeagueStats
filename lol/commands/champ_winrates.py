@@ -44,10 +44,10 @@ class ChampionWinratesCommand(command.Command):
 
     champion_list = cass.get_champions()
     champ_id_to_name = {champ.id: champ.name for champ in champion_list}
-    table = ({
+    table = [{
       'Champion': champ_id_to_name[result['_id']['championId']],
       'Wins': result['wins'],
       'Games Played': result['games_played'],
       'Win %': 100.0 * result['win_rate'],
-    } for result in self.db.matches.aggregate(pipeline))
-    print(tabulate.tabulate(table, headers={'Champion': 'Champion', 'Wins': 'Wins', 'Games Played': 'Games Played', 'Win %': 'Win %'}))
+    } for result in self.db.matches.aggregate(pipeline)]
+    print(tabulate.tabulate(table, headers='keys'))

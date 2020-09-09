@@ -1,15 +1,22 @@
 import attr
 import sys
 
+
+TRUE_VALUES = ['y', 'yes', 'true', 't']
+FALSE_VALUES = ['n', 'no', 'false', 'f']
+
+
 @attr.s
 class Flag(object):
   name = attr.ib()
   default = attr.ib(default=None)
   description = attr.ib(default="")
   value = attr.ib()
+  is_boolean = attr.ib(default=False)
   @value.default
   def _value_default(self):
     return self.default
+
 
 class Command(object):
 
@@ -43,6 +50,8 @@ class Command(object):
     print(f'Invalid usage. {usage}')
 
   def register_flag(self, flag):
+    if flag.is_boolean and flag.default != False and flag.default != True:
+      raise ValueError(f'Flag {flag.name} is boolean and has non boolean default.')
     self._flags[flag.name] = flag
 
   def flag(self, name):
@@ -65,7 +74,17 @@ class Command(object):
           self.print_invalid_usage()
           return
         if len(flag_val) == 2:
-          self._flags[flag_val[0]].value = flag_val[1]
+          if self._flags[flag_val[0]].is_boolean:
+            if flag_val[1].lower() in TRUE_VALUES:
+              self._flags[flag_val[0]].value = True
+            elif flag_val[1].lower() in FALSE_VALUES:
+              self._flags[flag_val[0]].value = False
+            else:
+              print(f'Flag value is supposed to be boolean: {flag_val[0]}')
+              self.print_invalid_usage()
+              return
+          else:
+            self._flags[flag_val[0]].value = flag_val[1]
         else:
           self._flags[flag_val[0]].value = True
       else:

@@ -24,9 +24,8 @@ class TableOutputFlags(object):
       print(tabulate.tabulate(rows, headers='keys'))
 
     if self.command.flag('csv_file') and rows:
-      with open(self.flag('csv_file'), 'w', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=list(table[0].keys()))
+      with open(self.command.flag('csv_file'), 'w', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
         writer.writeheader()
-        for row in table:
+        for row in rows:
           writer.writerow(row)
-

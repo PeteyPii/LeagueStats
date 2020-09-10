@@ -37,6 +37,7 @@ class CommandMap(object):
     command_map.register_command(champ_kdas.ChampionKdasCommand('kdas'))
     command_map.register_command(most_seen.MostSeenCommand('most_seen'))
     command_map.register_command(matchups.MatchupsCommand('matchups'))
+    command_map.register_command(matchups.CurrentMatchupsCommand('current_matchups'))
 
     client = pymongo.MongoClient()
     for name, command in command_map.commands.items():

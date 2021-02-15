@@ -1,7 +1,8 @@
 import pymongo
 
-from lol.commands import champ_winrates
+from lol.commands import champ_dmg
 from lol.commands import champ_kdas
+from lol.commands import champ_winrates
 from lol.commands import help_cmd
 from lol.commands import list_summoners
 from lol.commands import matchups
@@ -39,6 +40,7 @@ class CommandMap(object):
     command_map.register_command(most_seen.MostSeenCommand('most_seen'))
     command_map.register_command(matchups.MatchupsCommand('matchups'))
     command_map.register_command(matchups.CurrentMatchupsCommand('current_matchups'))
+    command_map.register_command(champ_dmg.ChampionDmgCommand('damage'))
 
     client = pymongo.MongoClient()
     for _, command in command_map.commands.items():

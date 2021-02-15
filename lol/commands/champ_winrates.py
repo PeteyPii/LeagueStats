@@ -1,24 +1,23 @@
-import cassiopeia as cass
-import datapipelines
 import collections
 import time
 
+import cassiopeia as cass
+import datapipelines
 from lol import command
 from lol.flags.match_filtering import MatchFilteringFlags
 from lol.flags.table_output import TableOutputFlags
 
 
 class ChampionWinratesCommand(command.Command):
+
   def __init__(self, name):
     super().__init__(name)
     self.match_filtering_flags = MatchFilteringFlags(self)
     self.table_output_flags = TableOutputFlags(self)
 
   def help_message(self):
-    return (
-        f'Usage: {self._PROGRAM} {self.name} <summoner_names>\n'
-        'Outputs each summoner\'s winrate on all of the champions they have played.'
-    )
+    return (f'Usage: {self._PROGRAM} {self.name} <summoner_names>\n'
+            'Outputs each summoner\'s winrate on all of the champions they have played.')
 
   def format_result(self, result):
     if result is None:
@@ -50,7 +49,7 @@ class ChampionWinratesCommand(command.Command):
                     'games_played': {'$sum': 1},
                     'wins': {'$sum': {'$cond': ['$participants.stats.win', 1, 0]}}}},
         {'$addFields': {'win_rate': {'$divide': ['$wins', '$games_played']}}},
-    ]
+    ]  # yapf: disable
     results = {(result['_id']['championId'], result['_id']['accountId']): result
                for result in self.db.matches.aggregate(pipeline)}
 
@@ -61,9 +60,8 @@ class ChampionWinratesCommand(command.Command):
                     'games_played': {'$sum': 1},
                     'wins': {'$sum': {'$cond': ['$participants.stats.win', 1, 0]}}}},
         {'$addFields': {'win_rate': {'$divide': ['$wins', '$games_played']}}},
-    ]
-    global_results = {result['_id']['championId']: result
-                      for result in self.db.matches.aggregate(global_pipeline)}
+    ]  # yapf: disable
+    global_results = {result['_id']['championId']: result for result in self.db.matches.aggregate(global_pipeline)}
 
     champion_list = cass.get_champions()
     champ_id_to_name = {champ.id: champ.name for champ in champion_list}

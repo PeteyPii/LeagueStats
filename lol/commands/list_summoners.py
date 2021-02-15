@@ -2,14 +2,12 @@ from lol import command
 
 
 class ListSummonersCommand(command.Command):
+
   def __init__(self, name):
     super().__init__(name)
 
   def help_message(self):
-    return (
-        f'Usage: {self._PROGRAM} {self.name}\n'
-        'Lists all the summoners that are being tracked.'
-    )
+    return (f'Usage: {self._PROGRAM} {self.name}\n' 'Lists all the summoners that are being tracked.')
 
   def _run_impl(self, args):
     if args:

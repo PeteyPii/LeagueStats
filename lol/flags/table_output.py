@@ -4,19 +4,14 @@ import tabulate
 from lol import common_flag
 from lol.command import Flag
 
+
 class TableOutputFlags(object):
+
   def __init__(self, command):
     self.print = common_flag.CommonFlag(
-        Flag(name='print',
-             default=True,
-             is_boolean=True,
-             description='Prints table output to stdout.'),
-        command)
+        Flag(name='print', default=True, is_boolean=True, description='Prints table output to stdout.'), command)
     self.csv_file = common_flag.CommonFlag(
-        Flag(name='csv_file',
-             default='',
-             description='CSV file to export the results to.'),
-        command)
+        Flag(name='csv_file', default='', description='CSV file to export the results to.'), command)
     self.command = command
 
   def output_table(self, rows):

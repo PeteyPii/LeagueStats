@@ -8,14 +8,12 @@ from lol.commands import update_matches
 
 
 class UpdateApiKeyCommand(command.Command):
+
   def __init__(self, name):
     super().__init__(name)
 
   def help_message(self):
-    return (
-        f'Usage: {self._PROGRAM} {self.name}\n'
-        'Updates databases for use with a new API key.'
-    )
+    return (f'Usage: {self._PROGRAM} {self.name}\n' 'Updates databases for use with a new API key.')
 
   def _run_impl(self, args):
     if len(args) != 0:

@@ -4,15 +4,14 @@ from lol import command
 
 
 class HelpCommand(command.Command):
+
   def __init__(self, name, command_map):
     super().__init__(name)
     self._command_map = command_map
 
   def help_message(self):
-    return (
-        f'Usage: {self._program} {self.name} [command]\n'
-        'Prints a help message about all commands or one particular command.'
-    )
+    return (f'Usage: {self._program} {self.name} [command]\n'
+            'Prints a help message about all commands or one particular command.')
 
   def _run_impl(self, args):
     if len(args) > 1:

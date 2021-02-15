@@ -1,6 +1,5 @@
-
-
 class CommonFlag(object):
+
   def __init__(self, flag, command):
     self.flag = flag
     self.command = command

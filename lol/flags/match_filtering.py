@@ -3,6 +3,7 @@ from lol.flags.queue import QueuesFlag
 
 
 class MatchFilteringFlags(object):
+
   def __init__(self, command):
     self.command = command
     self.time_flags = TimeFlags(command)

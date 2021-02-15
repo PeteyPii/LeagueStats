@@ -1,7 +1,6 @@
 import attr
 import sys
 
-
 TRUE_VALUES = ['y', 'yes', 'true', 't']
 FALSE_VALUES = ['n', 'no', 'false', 'f']
 
@@ -13,6 +12,7 @@ class Flag(object):
   description = attr.ib(default="")
   value = attr.ib()
   is_boolean = attr.ib(default=False)
+
   @value.default
   def _value_default(self):
     return self.default
@@ -94,4 +94,3 @@ class Command(object):
 
   def _run_impl(self, args):
     raise NotImplementedError()
-

@@ -11,11 +11,8 @@ from lol.flags.table_output import TableOutputFlags
 def full_matchups_table(command):
   counts = collections.defaultdict(lambda: collections.defaultdict(lambda: collections.defaultdict(int)))
   champion_list = sorted(cass.get_champions(), key=lambda c: c.name)
-  champ_id_to_name = {champ.id: champ.name for champ in champion_list}
 
-  pipeline = command.match_filtering_flags.filter_steps() + [
-   #  {'$match': {'participants.accountId': summoner.account_id}},
-  ]
+  pipeline = command.match_filtering_flags.filter_steps()
   for match in command.db.matches.aggregate(pipeline):
     for participant_as in match['participants']:
       for participant_against in match['participants']:
@@ -41,16 +38,14 @@ def full_matchups_table(command):
 
 
 class MatchupsCommand(command.Command):
+
   def __init__(self, name):
     super().__init__(name)
     self.match_filtering_flags = MatchFilteringFlags(self)
     self.table_output_flags = TableOutputFlags(self)
 
   def help_message(self):
-    return (
-        f'Usage: {self._PROGRAM} {self.name}\n'
-        'Prints winrates of champions when facing with/against others.'
-    )
+    return (f'Usage: {self._PROGRAM} {self.name}\n' 'Prints winrates of champions when facing with/against others.')
 
   def _run_impl(self, args):
     if len(args) != 0:
@@ -61,20 +56,20 @@ class MatchupsCommand(command.Command):
 
 
 class CurrentMatchupsCommand(command.Command):
+
   def __init__(self, name):
     super().__init__(name)
     self.match_filtering_flags = MatchFilteringFlags(self)
     self.table_output_flags = TableOutputFlags(self)
-    self.register_flag(command.Flag(name='wait',
-                                    default=True,
-                                    is_boolean=True,
-                                    description='Whether to wait for the summoner to be in a match.'))
+    self.register_flag(
+        command.Flag(name='wait',
+                     default=True,
+                     is_boolean=True,
+                     description='Whether to wait for the summoner to be in a match.'))
 
   def help_message(self):
-    return (
-        f'Usage: {self._PROGRAM} {self.name} <summoner_name>\n'
-        'Prints winrates of champion matchups in the current game.'
-    )
+    return (f'Usage: {self._PROGRAM} {self.name} <summoner_name>\n'
+            'Prints winrates of champion matchups in the current game.')
 
   def _run_impl(self, args):
     if len(args) != 1:

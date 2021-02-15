@@ -14,6 +14,7 @@ from lol.commands import update_summoners
 
 
 class CommandMap(object):
+
   def __init__(self):
     self.commands = {}
 
@@ -40,7 +41,7 @@ class CommandMap(object):
     command_map.register_command(matchups.CurrentMatchupsCommand('current_matchups'))
 
     client = pymongo.MongoClient()
-    for name, command in command_map.commands.items():
+    for _, command in command_map.commands.items():
       command.set_mongo_client(client)
 
     return command_map

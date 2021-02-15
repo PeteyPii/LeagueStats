@@ -6,14 +6,13 @@ from lol import command
 
 
 class TrackSummonerCommand(command.Command):
+
   def __init__(self, name):
     super().__init__(name)
 
   def help_message(self):
-    return (
-        f'Usage: {self._PROGRAM} {self.name} <summoner_name>\n'
-        'Adds a summoner to be tracked when running the "update" command.'
-    )
+    return (f'Usage: {self._PROGRAM} {self.name} <summoner_name>\n'
+            'Adds a summoner to be tracked when running the "update" command.')
 
   def _run_impl(self, args):
     if len(args) != 1:

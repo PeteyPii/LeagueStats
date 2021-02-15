@@ -2,6 +2,7 @@ import arrow
 import datetime
 import enum
 
+
 def bson_ready(a_dict):
   keys_to_delete = set()
   modifications = {}

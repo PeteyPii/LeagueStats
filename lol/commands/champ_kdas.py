@@ -1,23 +1,22 @@
-import cassiopeia as cass
 import collections
-import datapipelines
 
+import cassiopeia as cass
+import datapipelines
 from lol import command
 from lol.flags.match_filtering import MatchFilteringFlags
 from lol.flags.table_output import TableOutputFlags
 
 
 class ChampionKdasCommand(command.Command):
+
   def __init__(self, name):
     super().__init__(name)
     self.match_filtering_flags = MatchFilteringFlags(self)
     self.table_output_flags = TableOutputFlags(self)
 
   def help_message(self):
-    return (
-        f'Usage: {self._PROGRAM} {self.name} <summoner_names>\n'
-        'Outputs each summoner\'s KDA on all of the champions they have played.'
-    )
+    return (f'Usage: {self._PROGRAM} {self.name} <summoner_names>\n'
+            'Outputs each summoner\'s KDA on all of the champions they have played.')
 
   def format_result(self, result):
     if result is None:
@@ -57,7 +56,7 @@ class ChampionKdasCommand(command.Command):
                     }},
         {'$addFields': {'kda': {'$divide': [{'$add': ['$kills', '$assists']},
                                             {'$cond': [{'$lte': ['$deaths', 0]}, 1, '$deaths']}]}}},
-    ]
+    ]  # yapf: disable
     results = {(result['_id']['championId'], result['_id']['accountId']): result
                for result in self.db.matches.aggregate(pipeline)}
 
@@ -72,9 +71,8 @@ class ChampionKdasCommand(command.Command):
                     }},
         {'$addFields': {'kda': {'$divide': [{'$add': ['$kills', '$assists']},
                                             {'$cond': [{'$lte': ['$deaths', 0]}, 1, '$deaths']}]}}},
-    ]
-    global_results = {result['_id']['championId']: result
-               for result in self.db.matches.aggregate(global_pipeline)}
+    ]  # yapf: disable
+    global_results = {result['_id']['championId']: result for result in self.db.matches.aggregate(global_pipeline)}
 
     champion_list = cass.get_champions()
     champ_id_to_name = {champ.id: champ.name for champ in champion_list}

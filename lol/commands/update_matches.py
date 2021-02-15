@@ -13,15 +13,15 @@ def prune_match_data(match_data):
     # Who cares?
     del participant['matchHistoryUri']
 
+
 class UpdateMatchesCommand(command.Command):
+
   def __init__(self, name):
     super().__init__(name)
 
   def help_message(self):
-    return (
-        f'Usage: {self._PROGRAM} {self.name}\n'
-        'Updates the database with the matches for all summoners being tracked.'
-    )
+    return (f'Usage: {self._PROGRAM} {self.name}\n'
+            'Updates the database with the matches for all summoners being tracked.')
 
   def _run_impl(self, args):
     if args:
@@ -46,4 +46,7 @@ class UpdateMatchesCommand(command.Command):
 
       if matches_to_insert:
         self.db.matches.insert_many(matches_to_insert)
-      self.db.summoners.update({'puuid': summoner.puuid}, {'$set': {'last_updated_match_id': latest_match_id}}, upsert=False)
+      self.db.summoners.update({'puuid': summoner.puuid}, {'$set': {
+          'last_updated_match_id': latest_match_id
+      }},
+                               upsert=False)

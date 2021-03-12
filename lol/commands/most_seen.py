@@ -73,7 +73,7 @@ class MostSeenCommand(command.Command):
 
       if stats['same_team'] != stats['games_played']:
         win_rate_against = float(stats['wins_against']) / (stats['games_played'] - stats['same_team'])
-        wins_against = f'{stats["wins_against"]} / {stats["games_played"] - stats["same_team"]} ({100 * win_rate_against:3f})'
+        wins_against = f'{stats["wins_against"]} / {stats["games_played"] - stats["same_team"]} ({100 * win_rate_against:.3f})'
       else:
         wins_against = '-'
 
@@ -86,5 +86,6 @@ class MostSeenCommand(command.Command):
           ]))
 
     table.sort(key=lambda i: i['Games Played'])
+    table = table[-n:]
     table.reverse()
     self.table_output_flags.output_table(table)

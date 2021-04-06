@@ -7,7 +7,7 @@ from lol.flags.match_filtering import MatchFilteringFlags
 from lol.flags.table_output import TableOutputFlags
 
 
-class ChampionKdasCommand(command.Command):
+class ChampionPersonalBestsCommand(command.Command):
 
   def __init__(self, name):
     super().__init__(name)
@@ -16,15 +16,12 @@ class ChampionKdasCommand(command.Command):
 
   def help_message(self):
     return (f'Usage: {self._PROGRAM} {self.name} <summoner_names>\n'
-            'Outputs each summoner\'s KDA on all of the champions they have played.')
+            'Outputs each summoner\'s personal bests on all of the champions they have played.')
 
   def format_result(self, result):
     if result is None:
       return ''
-    avg_kills = float(result['kills']) / result['games_played']
-    avg_deaths = float(result['deaths']) / result['games_played']
-    avg_assists = float(result['assists']) / result['games_played']
-    return f'{result["kda"]:.3f}:1   {avg_kills:.1f} / {avg_deaths:.1f} / {avg_assists:.1f}   ({result["games_played"]})'
+    return f'{result["champ_damage"]:,}'.replace(',', ' ')
 
   def _run_impl(self, args):
     if len(args) != 1:
@@ -49,13 +46,8 @@ class ChampionKdasCommand(command.Command):
         {'$match': {'participants.accountId': {'$in': [summoner.account_id for summoner in summoners]}}},
         {'$group': {'_id': {'championId': '$participants.championId',
                             'accountId': '$participants.accountId'},
-                    'games_played': {'$sum': 1},
-                    'kills': {'$sum': '$participants.stats.kills'},
-                    'deaths': {'$sum': '$participants.stats.deaths'},
-                    'assists': {'$sum': '$participants.stats.assists'},
+                    'champ_damage': {'$max': '$participants.stats.totalDamageDealtToChampions'},
                     }},
-        {'$addFields': {'kda': {'$divide': [{'$add': ['$kills', '$assists']},
-                                            {'$cond': [{'$lte': ['$deaths', 0]}, 1, '$deaths']}]}}},
     ]  # yapf: disable
     results = {(result['_id']['championId'], result['_id']['accountId']): result
                for result in self.db.matches.aggregate(pipeline)}
@@ -65,12 +57,8 @@ class ChampionKdasCommand(command.Command):
         {'$unwind': '$participants'},
         {'$group': {'_id': {'championId': '$participants.championId'},
                     'games_played': {'$sum': 1},
-                    'kills': {'$sum': '$participants.stats.kills'},
-                    'deaths': {'$sum': '$participants.stats.deaths'},
-                    'assists': {'$sum': '$participants.stats.assists'},
+                    'champ_damage': {'$max': '$participants.stats.totalDamageDealtToChampions'},
                     }},
-        {'$addFields': {'kda': {'$divide': [{'$add': ['$kills', '$assists']},
-                                            {'$cond': [{'$lte': ['$deaths', 0]}, 1, '$deaths']}]}}},
     ]  # yapf: disable
     global_results = {result['_id']['championId']: result for result in self.db.matches.aggregate(global_pipeline)}
 

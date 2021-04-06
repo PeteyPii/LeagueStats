@@ -2,6 +2,7 @@ import pymongo
 
 from lol.commands import champ_dmg
 from lol.commands import champ_kdas
+from lol.commands import champ_pbs
 from lol.commands import champ_winrates
 from lol.commands import help_cmd
 from lol.commands import list_summoners
@@ -37,6 +38,7 @@ class CommandMap(object):
     command_map.register_command(update_api_key.UpdateApiKeyCommand('update_api_key'))
     command_map.register_command(champ_winrates.ChampionWinratesCommand('winrates'))
     command_map.register_command(champ_kdas.ChampionKdasCommand('kdas'))
+    command_map.register_command(champ_pbs.ChampionPersonalBestsCommand('pbs'))
     command_map.register_command(most_seen.MostSeenCommand('most_seen'))
     command_map.register_command(matchups.MatchupsCommand('matchups'))
     command_map.register_command(matchups.CurrentMatchupsCommand('current_matchups'))

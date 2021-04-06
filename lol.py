@@ -1,6 +1,5 @@
 import cassiopeia as cass
 import os
-import pymongo
 import sys
 
 from lol import command_map

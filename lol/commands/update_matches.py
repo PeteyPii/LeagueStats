@@ -1,4 +1,5 @@
 import cassiopeia as cass
+import datapipelines
 
 from lol import command
 from lol import encode
@@ -11,7 +12,8 @@ def prune_match_data(match_data):
 
   for participant in match_data['participants']:
     # Who cares?
-    del participant['matchHistoryUri']
+    if 'matchHistoryUri' in participant:
+      del participant['matchHistoryUri']
 
 
 class UpdateMatchesCommand(command.Command):
@@ -30,7 +32,7 @@ class UpdateMatchesCommand(command.Command):
     for summoner in self.db.summoners.find():
       print(f'Updating matches for {summoner["name"]}...')
       last_updated_match_id = summoner['last_updated_match_id']
-      summoner = cass.Summoner(puuid=summoner['puuid'])
+      summoner = cass.Summoner(puuid=summoner['puuid'], region=summoner['region'])
       matches_to_insert = []
       latest_match_id = None
       for match in summoner.match_history:
@@ -39,10 +41,13 @@ class UpdateMatchesCommand(command.Command):
         if match.id == last_updated_match_id:
           break
         if self.db.matches.find_one({'id': match.id}) is None:
-          match_data = match.load().to_dict()
-          encode.bson_ready(match_data)
-          prune_match_data(match_data)
-          matches_to_insert.append(match_data)
+          try:
+            match_data = match.load().to_dict()
+            encode.bson_ready(match_data)
+            prune_match_data(match_data)
+            matches_to_insert.append(match_data)
+          except datapipelines.common.NotFoundError:
+            print(f'Failed to load match ID {match.id}')
 
       if matches_to_insert:
         self.db.matches.insert_many(matches_to_insert)

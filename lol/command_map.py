@@ -11,6 +11,7 @@ from lol.commands import most_seen
 from lol.commands import track_summoner
 from lol.commands import untrack_summoner
 from lol.commands import update_api_key
+from lol.commands import update_v5
 from lol.commands import update_matches
 from lol.commands import update_summoners
 
@@ -36,6 +37,7 @@ class CommandMap(object):
     command_map.register_command(update_matches.UpdateMatchesCommand('update'))
     command_map.register_command(update_summoners.UpdateSummonersCommand('update_summoners'))
     command_map.register_command(update_api_key.UpdateApiKeyCommand('update_api_key'))
+    command_map.register_command(update_v5.UpdateV5Command('update_v5'))
     command_map.register_command(champ_winrates.ChampionWinratesCommand('winrates'))
     command_map.register_command(champ_kdas.ChampionKdasCommand('kdas'))
     command_map.register_command(champ_pbs.ChampionPersonalBestsCommand('pbs'))

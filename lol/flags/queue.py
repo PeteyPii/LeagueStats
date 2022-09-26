@@ -19,7 +19,6 @@ class QueuesFlag(common_flag.CommonFlag):
         Flag(name='queue',
              default='aram',
              description='Filters matches to those for the given queues (e.g. "aram,ranked").'), command)
-    self.command = command
 
   def filter_steps(self):
     if not self.command.flag('queue'):

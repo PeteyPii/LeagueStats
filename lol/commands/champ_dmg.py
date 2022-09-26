@@ -5,6 +5,7 @@ import statistics
 from lol import command
 from lol.flags.match_filtering import MatchFilteringFlags
 from lol.flags.table_output import TableOutputFlags
+from lol.flags.region import RegionFlag
 
 
 class ChampionDmgCommand(command.Command):
@@ -13,6 +14,7 @@ class ChampionDmgCommand(command.Command):
     super().__init__(name)
     self.match_filtering_flags = MatchFilteringFlags(self)
     self.table_output_flags = TableOutputFlags(self)
+    self.region_flag = RegionFlag(self)
 
   def help_message(self):
     return f'Usage: {self._PROGRAM} {self.name}\n' 'Outputs each champ\'s damage relative to others within a game.'
@@ -34,7 +36,7 @@ class ChampionDmgCommand(command.Command):
         if dmg == highest_dmg:
           champ_stats[participant['championId']]['top_dmg'] += 1
 
-    champion_list = cass.get_champions()
+    champion_list = cass.get_champions(region=self.region_flag.value)
     champ_id_to_name = {champ.id: champ.name for champ in champion_list}
 
     table = []

@@ -4,3 +4,7 @@ class CommonFlag(object):
     self.flag = flag
     self.command = command
     self.command.register_flag(flag)
+
+  @property
+  def value(self):
+    return self.flag.value

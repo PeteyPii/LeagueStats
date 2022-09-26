@@ -10,12 +10,6 @@ def main(argv):
   # cass.set_default_region('NA')
   all_commands_map = command_map.CommandMap.get_default()
 
-  # import pdb
-  # pdb.set_trace()
-  # x = cass.get_match('NA1_4339976655', region='NA')
-
-  # return
-
   if len(argv) <= 1:
     print(f'Invalid usage. Usage: {sys.argv[0]} <command> [args...]\n')
     all_commands_map.commands['help'].run([])

@@ -35,7 +35,7 @@ class ChampionWinratesCommand(command.Command):
         print(f'Summoner name cannot be empty.')
         return
       try:
-        summoners.append(cass.Summoner(name=name).load())
+        summoners.append(cass.Summoner(name=name, region='NA').load())
       except datapipelines.common.NotFoundError:
         print(f'Summoner "{name}" not found.')
         return

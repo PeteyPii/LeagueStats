@@ -13,7 +13,11 @@ class UpdateApiKeyCommand(command.Command):
     super().__init__(name)
 
   def help_message(self):
-    return (f'Usage: {self._PROGRAM} {self.name}\n' 'Updates databases for use with a new API key.')
+    return (f'Usage: {self._PROGRAM} {self.name}\n'
+            'Updates databases for use with a new API key.')
+
+  def is_expert_command(self):
+    return True
 
   def _run_impl(self, args):
     if len(args) != 0:

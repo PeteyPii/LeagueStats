@@ -14,6 +14,7 @@ from lol.commands import update_api_key
 from lol.commands import update_v5
 from lol.commands import update_matches
 from lol.commands import update_summoners
+from lol.commands import backfill
 
 
 class CommandMap(object):
@@ -45,6 +46,7 @@ class CommandMap(object):
     command_map.register_command(matchups.MatchupsCommand('matchups'))
     command_map.register_command(matchups.CurrentMatchupsCommand('current_matchups'))
     command_map.register_command(champ_dmg.ChampionDmgCommand('damage'))
+    command_map.register_command(backfill.BackfillMatchParticipantPuuidsCommand('backfill_match_participant_puuids'))
 
     client = pymongo.MongoClient()
     for _, command in command_map.commands.items():

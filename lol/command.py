@@ -28,10 +28,15 @@ class Command(object):
     self.db = None
     self._program = sys.argv[0]
     self._flags = {}
+    self.register_flag(Flag(name="x", description="Enable the use of expert commands.", default=False, is_boolean=True))
 
   def set_mongo_client(self, client):
     self.mongo_client = client
     self.db = self.mongo_client.lol
+
+  def is_expert_command(self):
+    """A command that should be used by expert users only."""
+    return False
 
   def help_message(self):
     raise NotImplementedError()
@@ -39,6 +44,8 @@ class Command(object):
   def help_message_flags(self):
     msg = []
     for flag in sorted(self._flags.keys()):
+      if flag == 'x':
+        continue
       if self._flags[flag].default == '':
         msg.append(f'--{flag}: {self._flags[flag].description}')
       else:
@@ -89,6 +96,10 @@ class Command(object):
           self._flags[flag_val[0]].value = True
       else:
         argv.append(arg)
+
+    if self.is_expert_command() and not self.flag('x'):
+      print(f'{self.name} command can only be used when --x is enabled. Pleas be sure you know what you\'re doing.')
+      return
 
     self._run_impl(argv)
 

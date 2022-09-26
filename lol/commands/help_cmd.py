@@ -21,8 +21,10 @@ class HelpCommand(command.Command):
     if len(args) != 1 or args[0] not in self._command_map.commands:
       print('Available commands:')
       for name in sorted(self._command_map.commands):
-        print(f'  {name}')
-        print(textwrap.indent(self._command_map.commands[name].help_message(), '    '))
+        command = self._command_map.commands[name]
+        if not command.is_expert_command() or self.flag('x'):
+          print(f'  {name}')
+          print(textwrap.indent(command.help_message(), '    '))
     else:
       print(self._command_map.commands[args[0]].help_message())
       if self._command_map.commands[args[0]]._flags:

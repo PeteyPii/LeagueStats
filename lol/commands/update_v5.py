@@ -16,6 +16,9 @@ class UpdateV5Command(command.Command):
     return (f'Usage: {self._PROGRAM} {self.name}\n'
             'Updates databases for use with Riot API v5.')
 
+  def is_expert_command(self):
+    return True
+
   def _run_impl(self, args):
     if len(args) != 0:
       return self.print_invalid_usage()

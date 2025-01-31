@@ -4,6 +4,7 @@ import datapipelines
 
 from lol import command
 from lol.flags.match_filtering import MatchFilteringFlags
+from lol.flags.region import RegionFlag
 from lol.flags.table_output import TableOutputFlags
 
 
@@ -13,6 +14,7 @@ class MostSeenCommand(command.Command):
     super().__init__(name)
     self.match_filtering_flags = MatchFilteringFlags(self)
     self.table_output_flags = TableOutputFlags(self)
+    self.region_flag = RegionFlag(self)
     self.register_flag(
         command.Flag(name='list_name_changes',
                      default=False,
@@ -33,35 +35,35 @@ class MostSeenCommand(command.Command):
       n = int(args[1])
 
     try:
-      summoner = cass.Summoner(name=summoner_name).load()
+      summoner = cass.Summoner(name=summoner_name, region=self.region_flag.value).load()
     except datapipelines.common.NotFoundError:
       print(f'Summoner "{summoner_name}" not found.')
       return
 
     counts = collections.defaultdict(lambda: collections.defaultdict(int))
     pipeline = self.match_filtering_flags.filter_steps() + [
-      {'$match': {'participants.accountId': summoner.account_id}},
+      {'$match': {'participants.puuid': summoner.puuid}},
     ]  # yapf: disable
     for match in self.db.matches.aggregate(pipeline):
       for participant in match['participants']:
-        if participant['accountId'] == summoner.account_id:
+        if participant['puuid'] == summoner.puuid:
           team = participant['side']
           break
       for participant in match['participants']:
-        if participant['accountId'] == '0':  # BOT account
+        if participant['puuid'] == '0':  # BOT account
           continue
-        if not counts[participant['accountId']]['name']:
-          counts[participant['accountId']]['name'] = set([participant['summonerName']])
+        if not counts[participant['puuid']]['name']:
+          counts[participant['puuid']]['name'] = set([participant['summonerName']])
         elif self.flag('list_name_changes'):
-          counts[participant['accountId']]['name'].add(participant['summonerName'])
+          counts[participant['puuid']]['name'].add(participant['summonerName'])
           pass
-        counts[participant['accountId']]['games_played'] += 1
+        counts[participant['puuid']]['games_played'] += 1
         same_team = team == participant['side']
-        counts[participant['accountId']]['same_team'] += int(same_team)
+        counts[participant['puuid']]['same_team'] += int(same_team)
         if same_team:
-          counts[participant['accountId']]['wins_with'] += int(participant['stats']['win'])
+          counts[participant['puuid']]['wins_with'] += int(participant['stats']['win'])
         else:
-          counts[participant['accountId']]['wins_against'] += int(not participant['stats']['win'])
+          counts[participant['puuid']]['wins_against'] += int(not participant['stats']['win'])
 
     table = []
     for stats in counts.values():

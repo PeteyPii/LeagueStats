@@ -3,12 +3,14 @@ import pymongo
 import datapipelines
 
 from lol import command
+from lol.flags.region import RegionFlag
 
 
 class TrackSummonerCommand(command.Command):
 
   def __init__(self, name):
     super().__init__(name)
+    self.region_flag = RegionFlag(self)
 
   def help_message(self):
     return (f'Usage: {self._PROGRAM} {self.name} <summoner_name>\n'
@@ -20,7 +22,7 @@ class TrackSummonerCommand(command.Command):
 
     summoner_name = args[0]
     try:
-      summoner = cass.Summoner(name=summoner_name).load()
+      summoner = cass.Summoner(name=summoner_name, region=self.region_flag.value).load()
     except datapipelines.common.NotFoundError:
       print(f'Summoner "{summoner_name}" not found.')
       return

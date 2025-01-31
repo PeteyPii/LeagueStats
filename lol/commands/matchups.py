@@ -5,12 +5,13 @@ import time
 from datapipelines.common import NotFoundError
 from lol import command
 from lol.flags.match_filtering import MatchFilteringFlags
+from lol.flags.region import RegionFlag
 from lol.flags.table_output import TableOutputFlags
 
 
 def full_matchups_table(command):
   counts = collections.defaultdict(lambda: collections.defaultdict(lambda: collections.defaultdict(int)))
-  champion_list = sorted(cass.get_champions(), key=lambda c: c.name)
+  champion_list = sorted(cass.get_champions(region=command.region_flag.value), key=lambda c: c.name)
 
   pipeline = command.match_filtering_flags.filter_steps()
   for match in command.db.matches.aggregate(pipeline):
@@ -43,9 +44,11 @@ class MatchupsCommand(command.Command):
     super().__init__(name)
     self.match_filtering_flags = MatchFilteringFlags(self)
     self.table_output_flags = TableOutputFlags(self)
+    self.region_flag = RegionFlag(self)
 
   def help_message(self):
-    return (f'Usage: {self._PROGRAM} {self.name}\n' 'Prints winrates of champions when facing with/against others.')
+    return (f'Usage: {self._PROGRAM} {self.name}\n'
+            'Prints winrates of champions when facing with/against others.')
 
   def _run_impl(self, args):
     if len(args) != 0:

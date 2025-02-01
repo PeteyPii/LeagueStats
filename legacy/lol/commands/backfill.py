@@ -1,11 +1,11 @@
-from tracemalloc import Snapshot
-import cassiopeia as cass
-import pymongo
-import datapipelines
 import functools
+from tracemalloc import Snapshot
 
-from lol import command
-from lol import encode
+import cassiopeia as cass
+import datapipelines
+import pymongo
+
+from lol import command, encode
 from lol.commands import update_matches
 
 
@@ -27,10 +27,10 @@ def _get_puuid_by_summoner_id(summoner_id, region):
 
 @functools.cache
 def _get_puuid_by_name(summoner_name, region):
-  try:
-    return cass.Summoner(name=summoner_name, region=region).puuid
-  except datapipelines.NotFoundError:
-    return None
+    try:
+        return cass.Summoner(name=summoner_name, region=region).puuid
+    except datapipelines.NotFoundError:
+        return None
 
 
 class BackfillMatchParticipantPuuidsCommand(command.Command):

@@ -1,8 +1,9 @@
-import cassiopeia as cass
 import collections
 import time
 
+import cassiopeia as cass
 from datapipelines.common import NotFoundError
+
 from lol import command
 from lol.flags.match_filtering import MatchFilteringFlags
 from lol.flags.region import RegionFlag
@@ -10,32 +11,32 @@ from lol.flags.table_output import TableOutputFlags
 
 
 def full_matchups_table(command):
-  counts = collections.defaultdict(lambda: collections.defaultdict(lambda: collections.defaultdict(int)))
-  champion_list = sorted(cass.get_champions(region=command.region_flag.value), key=lambda c: c.name)
+    counts = collections.defaultdict(lambda: collections.defaultdict(lambda: collections.defaultdict(int)))
+    champion_list = sorted(cass.get_champions(region=command.region_flag.value), key=lambda c: c.name)
 
-  pipeline = command.match_filtering_flags.filter_steps()
-  for match in command.db.matches.aggregate(pipeline):
-    for participant_as in match['participants']:
-      for participant_against in match['participants']:
-        if participant_as['side'] == participant_against['side']:
-          continue
-        stats = counts[participant_as['championId']][participant_against['championId']]
-        stats['games_played'] += 1
-        stats['wins'] += participant_as['stats']['win']
+    pipeline = command.match_filtering_flags.filter_steps()
+    for match in command.db.matches.aggregate(pipeline):
+        for participant_as in match["participants"]:
+            for participant_against in match["participants"]:
+                if participant_as["side"] == participant_against["side"]:
+                    continue
+                stats = counts[participant_as["championId"]][participant_against["championId"]]
+                stats["games_played"] += 1
+                stats["wins"] += participant_as["stats"]["win"]
 
-  table = []
-  for champ_as in champion_list:
-    row = collections.OrderedDict()
-    row['Champ As vs. Against'] = champ_as.name
-    for champ_against in champion_list:
-      stats = counts[champ_as.id][champ_against.id]
-      if not stats.get('games_played'):
-        row[champ_against.name] = '-'
-      else:
-        win_rate = float(stats['wins']) / stats['games_played']
-        row[champ_against.name] = f'{stats["wins"]} / {stats["games_played"]} ({100 * win_rate:.3f})'
-    table.append(row)
-  return table
+    table = []
+    for champ_as in champion_list:
+        row = collections.OrderedDict()
+        row["Champ As vs. Against"] = champ_as.name
+        for champ_against in champion_list:
+            stats = counts[champ_as.id][champ_against.id]
+            if not stats.get("games_played"):
+                row[champ_against.name] = "-"
+            else:
+                win_rate = float(stats["wins"]) / stats["games_played"]
+                row[champ_against.name] = f'{stats["wins"]} / {stats["games_played"]} ({100 * win_rate:.3f})'
+        table.append(row)
+    return table
 
 
 class MatchupsCommand(command.Command):

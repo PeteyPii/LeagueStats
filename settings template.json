@@ -1,0 +1,77 @@
+{
+  "global": {
+    "version_from_match": "patch",
+    "default_region": "NA"
+  },
+  "sql": {
+    "connection": {
+      "host": "localhost",
+      "user": "postgres",
+      "password": "XXXXXXXXXXXXXXXXXXXXXXXX",
+      "dbname": "postgres",
+      "port": "5432"
+    }
+  },
+  "updater": {
+    "interval_seconds": 300
+  },
+  "notifiarr": {
+    "api_key": "XXXXXXXXXXXXXXXXXXXXXXXX",
+    "channel_id": "XXXXXXXXXXXXXXXXXXXXXXXX",
+    "dry_run": true
+  },
+  "pipeline": {
+    "Cache": {},
+    "SimpleKVDiskStore": {
+      "package": "cassiopeia_diskstore",
+      "path": "/absolute/path"
+    },
+    "DDragon": {},
+    "RiotAPI": {
+      "api_key": "XXXXXXXXXXXXXXXXXXXXXXXX",
+      "limiting_share": 1.0,
+      "request_error_handling": {
+        "404": {
+          "strategy": "throw"
+        },
+        "429": {
+          "service": {
+            "strategy": "exponential_backoff",
+            "initial_backoff": 1.0,
+            "backoff_factor": 2.0,
+            "max_attempts": 4
+          },
+          "method": {
+            "strategy": "retry_from_headers",
+            "max_attempts": 5
+          },
+          "application": {
+            "strategy": "retry_from_headers",
+            "max_attempts": 5
+          }
+        },
+        "500": {
+          "strategy": "exponential_backoff",
+          "initial_backoff": 1.0,
+          "backoff_factor": 2.0,
+          "max_attempts": 4
+        },
+        "503": {
+          "strategy": "exponential_backoff",
+          "initial_backoff": 1.0,
+          "backoff_factor": 2.0,
+          "max_attempts": 4
+        },
+        "timeout": {
+          "strategy": "throw"
+        }
+      }
+    }
+  },
+  "logging": {
+    "print_calls": true,
+    "print_riot_api_key": false,
+    "default": "WARNING",
+    "core": "WARNING"
+  }
+}

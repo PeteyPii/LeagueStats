@@ -10,7 +10,7 @@ from datapipelines import common as dp_common
 from psycopg import errors
 from psycopg.types import json
 
-from app import async_utils, db, encode, settings
+from app import async_utils, db, encode, model, settings
 
 router = fastapi.APIRouter()
 
@@ -69,11 +69,9 @@ async def update_matches():
 
 
 @router.post("/v1/update_matches")
-async def update_matches_handler(
-    _: pydantic.BaseModel, background_tasks: fastapi.BackgroundTasks
-) -> pydantic.BaseModel:
+async def update_matches_handler(_: model.Empty, background_tasks: fastapi.BackgroundTasks) -> model.Empty:
     background_tasks.add_task(update_matches)
-    return pydantic.BaseModel()
+    return model.Empty()
 
 
 async def update_matches_loop(interval_seconds: int | float | None = None):

@@ -1,6 +1,7 @@
 import asyncio
 import contextlib
 import logging
+import sys
 
 import fastapi
 import uvicorn
@@ -10,6 +11,11 @@ from app import notifiarr, settings
 from app.routers import summoner, update_matches
 
 logger = logging.getLogger(__name__)
+
+if sys.platform == "win32":
+    # Default doesn't work with psycopg3
+    # Also needed here because 'fastapi run' does something weird, idk
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 
 @contextlib.asynccontextmanager
@@ -34,7 +40,7 @@ async def exception_handling_middleware(request: fastapi.Request, call_next):
     try:
         return await call_next(request)
     except Exception as e:
-        logger.exception("Internal server error", exc_info=e)
+        logger.exception("Internal server error:", exc_info=e)
         notifiarr.send_notification(
             event="LeagueStats",
             title="Server Error",

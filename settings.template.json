@@ -72,6 +72,36 @@
     "print_calls": true,
     "print_riot_api_key": false,
     "default": "WARNING",
-    "core": "WARNING"
+    "core": "WARNING",
+    "version": 1,
+    "formatters": {
+      "simple": {
+        "format": "%(levelname).1s%(asctime)s.%(msecs)03d %(thread)d %(taskName)s %(filename)s:%(lineno)d] %(message)s",
+        "datefmt": "%m%d %H:%M:%S"
+      }
+    },
+    "handlers": {
+      "console": {
+        "class": "logging.StreamHandler",
+        "level": "DEBUG",
+        "formatter": "simple",
+        "stream": "ext://sys.stderr"
+      }
+    },
+    "loggers": {
+      "app": {
+        "level": "INFO",
+        "handlers": [
+          "console"
+        ],
+        "propagate": false
+      }
+    },
+    "root": {
+      "level": "WARNING",
+      "handlers": [
+        "console"
+      ]
+    }
   }
 }

@@ -1,6 +1,7 @@
 import asyncio
 import functools
 import json
+import logging.config
 import sys
 from typing import Any
 
@@ -8,6 +9,7 @@ import cassiopeia as cass
 
 SETTINGS_PATH = "settings.json"
 
+logger = logging.getLogger(__name__)
 
 @functools.cache
 def get_dict():
@@ -28,7 +30,10 @@ def notifiarr_settings() -> dict[str, Any]:
 
 
 def apply_global_settings():
-    if sys.platform == "win32":
-        # Default doesn't work with psycop3
-        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
     cass.apply_settings(SETTINGS_PATH)
+
+    if sys.platform == "win32":
+        # Default doesn't work with psycopg3
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+    logging.config.dictConfig(get_dict()["logging"])

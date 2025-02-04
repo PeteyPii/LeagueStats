@@ -8,12 +8,9 @@ import fastapi
 import pydantic
 from datapipelines import common as dp_common
 from psycopg import errors
-from psycopg.types import json as json
+from psycopg.types import json
 
-import async_utils
-import db
-import encode
-import settings
+from app import async_utils, db, encode, settings
 
 router = fastapi.APIRouter()
 

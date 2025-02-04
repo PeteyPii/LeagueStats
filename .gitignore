@@ -2,4 +2,5 @@
 *.sublime-workspace
 __pycache__
 settings.json
+settings.docker.json
 .vscode/

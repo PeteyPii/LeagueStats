@@ -3,7 +3,7 @@ from typing import Any, Sequence
 
 import psycopg as pg
 
-import settings
+from app import settings
 
 _CREATE_HASHED_KEY = """
 CREATE TABLE IF NOT EXISTS hashed_key (

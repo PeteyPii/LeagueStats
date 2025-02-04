@@ -6,9 +6,8 @@ import fastapi
 import uvicorn
 from fastapi import responses
 
-import notifiarr
-import settings
-from routers import summoner, update_matches
+from app import notifiarr, settings
+from app.routers import summoner, update_matches
 
 logger = logging.getLogger(__name__)
 

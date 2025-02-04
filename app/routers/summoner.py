@@ -8,9 +8,7 @@ from fastapi import status
 from psycopg import errors
 from psycopg.types import json
 
-import db
-import model
-import settings
+from app import db, model, settings
 
 router = fastapi.APIRouter()
 

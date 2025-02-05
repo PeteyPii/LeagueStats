@@ -1,9 +1,12 @@
 import hashlib
+import logging
 from typing import Any, Sequence
 
 import psycopg as pg
 
 from app import settings
+
+logger = logging.getLogger(__name__)
 
 _CREATE_HASHED_KEY = """
 CREATE TABLE IF NOT EXISTS hashed_key (
@@ -24,12 +27,14 @@ _CREATE_TRACKED_SUMMONERS_INDICES = (
     """
 CREATE UNIQUE INDEX IF NOT EXISTS idx_tracked_summoners_account_data_puuid ON tracked_summoners (
     (account_data -> 'puuid')
-);
+)
+NULLS NOT DISTINCT;
 """,
     """
 CREATE UNIQUE INDEX IF NOT EXISTS idx_tracked_summoners_summoner_data_puuid ON tracked_summoners (
     (summoner_data -> 'puuid')
-);
+)
+NULLS NOT DISTINCT;
 """,
 )
 
@@ -42,10 +47,14 @@ CREATE TABLE IF NOT EXISTS matches (
 
 _CREATE_MATCHES_INDICES = (
     """
-CREATE UNIQUE INDEX IF NOT EXISTS idx_matches_id_region ON matches (
+CREATE UNIQUE INDEX IF NOT EXISTS idx_matches_uniqueness ON matches (
     (match_data -> 'region'),
+    (match_data -> 'continent'),
+    (match_data -> 'platform'),
+    (match_data -> 'matchId'),
     (match_data -> 'id')
-);
+)
+NULLS NOT DISTINCT;
 """,
 )
 
@@ -54,7 +63,12 @@ class InvalidRiotApiKeyError(Exception):
     pass
 
 
+class MissingRiotApiKeyError(Exception):
+    pass
+
+
 def init():
+    logger.info("Initializing DB")
     with connect() as conn:
         for query in (_CREATE_HASHED_KEY, _CREATE_TRACKED_SUMMONERS, _CREATE_MATCHES):
             conn.execute(query)
@@ -63,18 +77,27 @@ def init():
         for query in _CREATE_MATCHES_INDICES:
             conn.execute(query)
 
-    validate_or_insert_riot_api_key()
+    insert_riot_api_key()
 
 
-def validate_or_insert_riot_api_key():
+def validate_riot_api_key() -> True:
     expected_row = {"hashed_key": hashlib.sha256(settings.riot_api_key().encode()).digest()}
     with connect() as conn:
         for actual_row in conn.execute("SELECT hashed_key FROM hashed_key LIMIT 1"):
             if actual_row != expected_row:
                 raise InvalidRiotApiKeyError("DB created with a different API key.")
-            return
+            return True
+    raise MissingRiotApiKeyError("DB has no API key.")
 
-        conn.execute("INSERT INTO hashed_key VALUES (%s)", (expected_row["hashed_key"],))
+
+def insert_riot_api_key():
+    try:
+        if validate_riot_api_key():
+            return
+    except MissingRiotApiKeyError:
+        hashed_key = hashlib.sha256(settings.riot_api_key().encode()).digest()
+        with connect() as conn:
+            conn.execute("INSERT INTO hashed_key VALUES (%s)", (hashed_key,))
 
 
 class DictRowFactory:

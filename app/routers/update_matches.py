@@ -18,6 +18,13 @@ logger = logging.getLogger(__name__)
 _LOCK = threading.Lock()
 
 
+def prune_match_data(match_data):
+    for team in match_data["teams"]:
+        # Available from match_data['participants']
+        if "participants" in team:
+            del team["participants"]
+
+
 async def _update_matches_locked():
     loop = asyncio.get_running_loop()
     async with await db.async_connect() as conn:
@@ -45,9 +52,11 @@ async def _update_matches_locked():
                     continue
 
                 try:
+                    match_data = match.to_dict()
+                    prune_match_data(match_data)
                     await conn.execute(
                         "INSERT INTO matches(match_data) VALUES (%s)",
-                        (json.Jsonb(encode.json_ready(match.to_dict())),),
+                        (json.Jsonb(encode.json_ready(match_data)),),
                     )
                     matches_stored += 1
                 except errors.UniqueViolation:
@@ -56,7 +65,7 @@ async def _update_matches_locked():
 
             if latest_match_id is not None:
                 logger.info(
-                    f"Updated {row["account_data"]["name"]} and stored {matches_stored} new match{"es" if matches_stored != 1 else ""}"
+                    f"Updated {row["account_data"]["name"]}#{row["account_data"]["tagline"]} and stored {matches_stored} new match{"es" if matches_stored != 1 else ""}"
                 )
                 await conn.execute(
                     "UPDATE tracked_summoners SET last_updated_match_id = %s WHERE id = %s",

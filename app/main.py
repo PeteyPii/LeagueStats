@@ -7,7 +7,7 @@ import fastapi
 import uvicorn
 from fastapi import responses
 
-from app import notifiarr, settings
+from app import db, notifiarr, settings
 from app.routers import summoner, update_matches
 
 logger = logging.getLogger(__name__)
@@ -20,8 +20,8 @@ if sys.platform == "win32":
 
 @contextlib.asynccontextmanager
 async def lifespan(_: fastapi.FastAPI):
-    # logging.getLogger().setLevel(logging.INFO)
-
+    logging.config.dictConfig(settings.get_dict()["logging"])
+    db.init()
     settings.apply_global_settings()
 
     update_matches_task = asyncio.create_task(update_matches.update_matches_loop())

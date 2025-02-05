@@ -7,6 +7,8 @@ from typing import Any
 
 import cassiopeia as cass
 
+from app import db
+
 SETTINGS_PATH = "settings.json"
 
 logger = logging.getLogger(__name__)
@@ -30,10 +32,11 @@ def notifiarr_settings() -> dict[str, Any]:
 
 
 def apply_global_settings():
+    logging.config.dictConfig(get_dict()["logging"])
     cass.apply_settings(SETTINGS_PATH)
+
+    db.validate_riot_api_key()
 
     if sys.platform == "win32":
         # Default doesn't work with psycopg3
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-
-    logging.config.dictConfig(get_dict()["logging"])

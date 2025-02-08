@@ -95,6 +95,13 @@
           "console"
         ],
         "propagate": false
+      },
+      "__main__": {
+        "level": "INFO",
+        "handlers": [
+          "console"
+        ],
+        "propagate": false
       }
     },
     "root": {

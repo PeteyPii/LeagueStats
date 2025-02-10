@@ -1,14 +1,62 @@
+import datetime
 from typing import Any
 
+import cassiopeia as cass
 import pydantic
+from psycopg import sql
 
 
 class Empty(pydantic.BaseModel):
     pass
 
 
-class TrackedSummoner(pydantic.BaseModel):
-    id: int
-    account_data: dict[str, Any]
-    summoner_data: dict
-    last_updated_match_id: str | None
+class Summoner(pydantic.BaseModel):
+    name: str
+    tagline: str
+    region: cass.Region
+
+
+class MatchFilters(pydantic.BaseModel):
+    region: cass.Region | None = None
+    queue: cass.Queue | None = None
+    after: datetime.datetime | None = None
+    before: datetime.datetime | None = None
+
+    def sql_filter_expression(self, src_table: str = "matches"):
+        conjunctions = []
+        if self.region is not None:
+            conjunctions.append(
+                sql.SQL("{0}.match_data -> 'platformId' = {1}").format(
+                    sql.Identifier(src_table), sql.Placeholder("MatchFilters.region")
+                )
+            )
+        if self.queue is not None:
+            conjunctions.append(
+                sql.SQL("{0}.match_data -> 'queue' = {1}").format(
+                    sql.Identifier(src_table), sql.Placeholder("MatchFilters.queue")
+                )
+            )
+        if self.after is not None:
+            conjunctions.append(
+                sql.SQL("{0}.match_data -> 'start' >= {1}").format(
+                    sql.Identifier(src_table), sql.Placeholder("MatchFilters.after")
+                )
+            )
+        if self.before is not None:
+            conjunctions.append(
+                sql.SQL("{0}.match_data -> 'start' <= {1}").format(
+                    sql.Identifier(src_table), sql.Placeholder("MatchFilters.before")
+                )
+            )
+        if not conjunctions:
+            return sql.SQL("TRUE")
+
+        return sql.SQL(" AND ").join(conjunctions)
+
+    def sql_filter_params(self) -> dict[str, Any]:
+        return {
+            "MatchFilters.region": cass.Platform.from_region(self.region).value if self.region is not None else None,
+            "MatchFilters.queue": self.queue.id if self.queue is not None else None,
+            "MatchFilters.after": self.after,
+            "MatchFilters.before": self.before,
+        }

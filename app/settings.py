@@ -23,6 +23,10 @@ def riot_api_key() -> str:
     return get_dict()["pipeline"]["RiotAPI"]["api_key"]
 
 
+def default_region() -> cass.Region:
+    return cass.Region(get_dict()["global"]["default_region"])
+
+
 def sql_conn_settings() -> dict[str, Any]:
     return get_dict()["sql"]["connection"]
 

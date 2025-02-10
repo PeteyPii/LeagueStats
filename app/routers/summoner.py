@@ -1,4 +1,5 @@
 import asyncio
+from typing import Any
 
 import cassiopeia as cass
 import fastapi
@@ -13,26 +14,44 @@ from app import db, model, settings
 router = fastapi.APIRouter()
 
 
-class CreateTrackedSummonerRequest(pydantic.BaseModel):
-    name: str
-    tagline: str
-    region: cass.Region
+class AccountNotFoundError(Exception):
+    pass
 
 
-@router.post("/v1/summoners")
-async def create_tracked_summoner(request: CreateTrackedSummonerRequest) -> model.TrackedSummoner:
+class CreateTrackedSummonerRequest(model.Summoner):
+    pass
+
+
+class TrackedSummoner(pydantic.BaseModel):
+    id: int
+    account_data: dict[str, Any]
+    summoner_data: dict
+    last_updated_match_id: str | None
+
+
+async def get_loaded_account(summoner_info: model.Summoner) -> cass.Account:
     loop = asyncio.get_running_loop()
     try:
-        account = cass.Account(name=request.name, tagline=request.tagline, region=request.region)
+        account = cass.Account(name=summoner_info.name, tagline=summoner_info.tagline, region=summoner_info.region)
         await loop.run_in_executor(None, account.load)
     except dp_common.NotFoundError:
-        raise fastapi.HTTPException(status_code=fastapi.status.HTTP_404_NOT_FOUND, detail="Account not found")
+        AccountNotFoundError("Account not found")
 
     try:
         summoner = account.summoner
         await loop.run_in_executor(None, summoner.load)
     except dp_common.NotFoundError:
-        raise fastapi.HTTPException(status_code=fastapi.status.HTTP_404_NOT_FOUND, detail="Summoner not found")
+        AccountNotFoundError("Summoner not found")
+
+    return account
+
+
+@router.post("/v1/summoners")
+async def create_tracked_summoner(request: CreateTrackedSummonerRequest) -> TrackedSummoner:
+    try:
+        account = await get_loaded_account(request)
+    except AccountNotFoundError as e:
+        raise fastapi.HTTPException(status_code=fastapi.status.HTTP_404_NOT_FOUND, detail=str(e))
 
     try:
         async with await db.async_connect() as conn:
@@ -42,9 +61,9 @@ async def create_tracked_summoner(request: CreateTrackedSummonerRequest) -> mode
                     VALUES (%s, %s)
                     RETURNING id, account_data, summoner_data;
                 """,
-                (json.Jsonb(account.to_dict()), json.Jsonb(summoner.to_dict())),
+                (json.Jsonb(account.to_dict()), json.Jsonb(account.summoner.to_dict())),
             ):
-                return model.TrackedSummoner.model_construct(**item)
+                return TrackedSummoner.model_construct(**item)
     except errors.UniqueViolation:
         raise fastapi.HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Already exists")
 

@@ -8,7 +8,7 @@ import uvicorn
 from fastapi import responses
 
 from app import db, notifiarr, settings
-from app.routers import summoner, update_matches
+from app.routers import champ_win_rates, summoner, update_matches
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +33,7 @@ app = fastapi.FastAPI(lifespan=lifespan)
 
 app.include_router(summoner.router)
 app.include_router(update_matches.router)
+app.include_router(champ_win_rates.router)
 
 
 @app.middleware("http")

@@ -1,4 +1,5 @@
 import datetime
+import re
 from typing import Any
 
 import cassiopeia as cass
@@ -14,6 +15,18 @@ class Summoner(pydantic.BaseModel):
     name: str
     tagline: str
     region: cass.Region
+
+    model_config = pydantic.ConfigDict(frozen=True)
+
+    def encode(self):
+        return f"{self.name}#{self.tagline} [{self.region.value}]"
+
+    @classmethod
+    def decode(cls, s: str):
+        match = re.match(r"()#() (\[.*\])", s)
+        if match is None:
+            raise ValueError(f"'{s}' is not a valid summoner encoding")
+        return cls.model_construct(name=match.group(1), tagline=match.group(2), region=match.group(3))
 
 
 class MatchFilters(pydantic.BaseModel):
